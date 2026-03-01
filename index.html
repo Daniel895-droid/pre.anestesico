@@ -1,0 +1,2799 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PreAnestesia</title>
+<meta name="description" content="App de avaliacao pre-anestesica digital">
+<meta name="theme-color" content="#f0faf6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PreAnestesia">
+<link rel="apple-touch-icon" href="icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512x512.png">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
+}
+
+html {
+-webkit-text-size-adjust: 100%;
+}
+
+body {
+font-family: ‘DM Sans’, -apple-system, BlinkMacSystemFont, sans-serif;
+background: #f4f8f6;
+color: #1e293b;
+min-height: 100vh;
+min-height: -webkit-fill-available;
+overflow-x: hidden;
+-webkit-overflow-scrolling: touch;
+}
+
+body::before {
+content: ‘’;
+position: fixed;
+top: -30%;
+right: -30%;
+width: 80%;
+height: 80%;
+background: radial-gradient(ellipse, rgba(16, 185, 129, 0.06) 0%, transparent 65%);
+z-index: 0;
+pointer-events: none;
+}
+
+/* ===== SAFE AREA for iPhone notch ===== */
+.header {
+position: sticky;
+top: 0;
+z-index: 100;
+background: rgba(255, 255, 255, 0.88);
+-webkit-backdrop-filter: blur(20px);
+backdrop-filter: blur(20px);
+border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+padding: 12px 20px;
+padding-top: max(12px, env(safe-area-inset-top));
+}
+
+.header-content {
+max-width: 600px;
+margin: 0 auto;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.logo {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.logo-icon {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, #10b981, #0d9488);
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 18px;
+flex-shrink: 0;
+box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.logo-text {
+font-weight: 700;
+font-size: 18px;
+letter-spacing: -0.5px;
+}
+
+.logo-text span {
+color: #10b981;
+}
+
+.header-actions {
+display: flex;
+gap: 8px;
+}
+
+.header-btn {
+width: 38px;
+height: 38px;
+border-radius: 10px;
+border: 1px solid rgba(0, 0, 0, 0.07);
+background: #ffffff;
+color: #64748b;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+font-size: 16px;
+-webkit-appearance: none;
+appearance: none;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.header-btn:active {
+border-color: rgba(16, 185, 129, 0.35);
+color: #10b981;
+background: #d1fae5;
+}
+
+.container {
+max-width: 600px;
+margin: 0 auto;
+padding: 20px;
+padding-bottom: max(40px, env(safe-area-inset-bottom));
+position: relative;
+z-index: 1;
+}
+
+/* ===== PROGRESS ===== */
+.progress-container {
+margin-bottom: 28px;
+}
+
+.progress-steps {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 12px;
+}
+
+.progress-step {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 6px;
+flex: 1;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-dot {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+border: 2px solid #94a3b8;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+font-weight: 700;
+color: #94a3b8;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-step.active .step-dot {
+border-color: #10b981;
+color: #10b981;
+background: rgba(16, 185, 129, 0.10);
+box-shadow: 0 0 16px rgba(16, 185, 129, 0.10);
+}
+
+.progress-step.completed .step-dot {
+border-color: #10b981;
+background: #10b981;
+color: #ffffff;
+}
+
+.step-label {
+font-size: 10px;
+font-weight: 600;
+color: #94a3b8;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+text-align: center;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-step.active .step-label,
+.progress-step.completed .step-label {
+color: #10b981;
+}
+
+.progress-bar {
+height: 3px;
+background: #ffffff;
+border-radius: 2px;
+overflow: hidden;
+}
+
+.progress-fill {
+height: 100%;
+background: linear-gradient(90deg, #10b981, #0d9488);
+border-radius: 2px;
+transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== STEP VIEWS ===== */
+.step-view {
+display: none;
+-webkit-animation: fadeInUp 0.4s ease;
+animation: fadeInUp 0.4s ease;
+}
+
+.step-view.active {
+display: block;
+}
+
+@-webkit-keyframes fadeInUp {
+from { opacity: 0; -webkit-transform: translateY(16px); transform: translateY(16px); }
+to { opacity: 1; -webkit-transform: translateY(0); transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+from { opacity: 0; transform: translateY(16px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.step-title {
+font-size: 24px;
+font-weight: 700;
+letter-spacing: -0.5px;
+margin-bottom: 4px;
+}
+
+.step-subtitle {
+font-size: 14px;
+color: #64748b;
+margin-bottom: 24px;
+}
+
+/* ===== CARDS ===== */
+.card {
+background: #ffffff;
+border: 1px solid rgba(0, 0, 0, 0.07);
+border-radius: 16px;
+padding: 20px;
+margin-bottom: 16px;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 16px;
+}
+
+.card-icon {
+width: 36px;
+height: 36px;
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 16px;
+flex-shrink: 0;
+}
+
+.card-icon.teal { background: #d1fae5; }
+.card-icon.red { background: #fef2f2; }
+.card-icon.orange { background: #fffbeb; }
+.card-icon.blue { background: #eff6ff; }
+
+.card-title {
+font-size: 15px;
+font-weight: 600;
+}
+
+/* ===== FORM ELEMENTS ===== */
+.form-group {
+margin-bottom: 16px;
+}
+
+.form-label {
+display: block;
+font-size: 12px;
+font-weight: 600;
+color: #64748b;
+text-transform: uppercase;
+letter-spacing: 0.8px;
+margin-bottom: 8px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+width: 100%;
+padding: 12px 16px;
+background: #f4f8f6;
+border: 1px solid rgba(0, 0, 0, 0.07);
+border-radius: 12px;
+color: #1e293b;
+font-family: ‘DM Sans’, -apple-system, sans-serif;
+font-size: 16px;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+outline: none;
+-webkit-appearance: none;
+appearance: none;
+box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+border-color: #10b981;
+box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.10);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+color: #94a3b8;
+}
+
+.form-select {
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘12’ viewBox=‘0 0 24 24’ fill=‘none’ stroke=’%238a9bc0’ stroke-width=‘2’%3E%3Cpath d=‘M6 9l6 6 6-6’/%3E%3C/svg%3E”);
+background-repeat: no-repeat;
+background-position: right 14px center;
+padding-right: 36px;
+cursor: pointer;
+}
+
+.form-textarea {
+resize: vertical;
+min-height: 80px;
+}
+
+.form-row {
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 12px;
+}
+
+.form-row-3 {
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 12px;
+}
+
+/* ===== TOGGLES ===== */
+.toggle-group {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.toggle-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 14px;
+background: #f4f8f6;
+border: 1px solid rgba(0, 0, 0, 0.07);
+border-radius: 12px;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+-webkit-user-select: none;
+user-select: none;
+}
+
+.toggle-item:active {
+background: #eaf3ef;
+}
+
+.toggle-item.selected {
+border-color: rgba(16, 185, 129, 0.35);
+background: #d1fae5;
+}
+
+.toggle-check {
+width: 22px;
+height: 22px;
+border-radius: 6px;
+border: 2px solid #94a3b8;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+flex-shrink: 0;
+color: transparent;
+}
+
+.toggle-item.selected .toggle-check {
+background: #10b981;
+border-color: #10b981;
+color: #ffffff;
+}
+
+.toggle-text {
+font-size: 14px;
+color: #64748b;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-item.selected .toggle-text {
+color: #1e293b;
+}
+
+/* ===== MALLAMPATI ===== */
+.mallampati-grid {
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+.mallampati-option {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 8px;
+padding: 14px 8px;
+background: #f4f8f6;
+border: 2px solid rgba(0, 0, 0, 0.07);
+border-radius: 12px;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+text-align: center;
+}
+
+.mallampati-option:active {
+background: #eaf3ef;
+}
+
+.mallampati-option.selected {
+border-color: #10b981;
+background: #d1fae5;
+}
+
+.mallampati-visual {
+width: 44px;
+height: 44px;
+border-radius: 50%;
+background: #f4f8f6;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+overflow: hidden;
+}
+
+.mallampati-option.selected .mallampati-visual {
+background: rgba(16, 185, 129, 0.18);
+}
+
+.mallampati-label {
+font-size: 12px;
+font-weight: 700;
+color: #64748b;
+font-family: ‘Space Mono’, monospace;
+}
+
+.mallampati-option.selected .mallampati-label {
+color: #10b981;
+}
+
+.mallampati-desc {
+font-size: 9px;
+color: #94a3b8;
+line-height: 1.3;
+}
+
+/* ===== ASA ===== */
+.asa-grid {
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 8px;
+}
+
+.asa-option {
+padding: 12px 8px;
+background: #f4f8f6;
+border: 2px solid rgba(0, 0, 0, 0.07);
+border-radius: 12px;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+text-align: center;
+}
+
+.asa-option:active {
+background: #eaf3ef;
+}
+
+.asa-option.selected {
+border-color: #10b981;
+background: #d1fae5;
+}
+
+.asa-number {
+font-family: ‘Space Mono’, monospace;
+font-size: 20px;
+font-weight: 700;
+color: #94a3b8;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.asa-option.selected .asa-number {
+color: #10b981;
+}
+
+.asa-desc {
+font-size: 10px;
+color: #94a3b8;
+margin-top: 4px;
+line-height: 1.3;
+}
+
+/* ===== NAV BUTTONS ===== */
+.nav-buttons {
+display: flex;
+gap: 12px;
+margin-top: 28px;
+margin-bottom: 40px;
+padding-bottom: env(safe-area-inset-bottom);
+}
+
+.btn {
+flex: 1;
+padding: 14px 24px;
+border-radius: 12px;
+border: none;
+font-family: ‘DM Sans’, -apple-system, sans-serif;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
+-webkit-appearance: none;
+appearance: none;
+}
+
+.btn-secondary {
+background: #ffffff;
+color: #64748b;
+border: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.btn-secondary:active {
+background: #f0faf6;
+color: #1e293b;
+}
+
+.btn-primary {
+background: linear-gradient(135deg, #10b981, #059669);
+color: #ffffff;
+box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.btn-primary:active {
+box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+opacity: 0.9;
+}
+
+.btn-danger {
+background: #fef2f2;
+color: #ef4444;
+border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:active {
+background: rgba(239, 68, 68, 0.15);
+}
+
+/* ===== SUMMARY ===== */
+.summary-section {
+margin-bottom: 20px;
+}
+
+.summary-label {
+font-size: 11px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1px;
+color: #94a3b8;
+margin-bottom: 6px;
+}
+
+.summary-value {
+font-size: 15px;
+color: #1e293b;
+line-height: 1.6;
+word-wrap: break-word;
+}
+
+.summary-value.highlight {
+color: #10b981;
+font-weight: 600;
+font-family: ‘Space Mono’, monospace;
+}
+
+.summary-divider {
+border: none;
+height: 1px;
+background: rgba(0, 0, 0, 0.07);
+margin: 16px 0;
+}
+
+.summary-tag {
+display: inline-block;
+padding: 4px 10px;
+background: #d1fae5;
+border: 1px solid rgba(16, 185, 129, 0.35);
+border-radius: 6px;
+font-size: 12px;
+font-weight: 600;
+color: #059669;
+margin: 2px 4px 2px 0;
+}
+
+.summary-tag.red {
+background: #fef2f2;
+border-color: rgba(239, 68, 68, 0.2);
+color: #ef4444;
+}
+
+/* ===== PATIENT DETAIL MODAL ===== */
+.detail-overlay {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0, 0, 0, 0.4);
+z-index: 200;
+-webkit-align-items: flex-end;
+align-items: flex-end;
+-webkit-justify-content: center;
+justify-content: center;
+padding: 0;
+}
+
+.detail-overlay.show {
+display: -webkit-flex;
+display: flex;
+}
+
+.detail-sheet {
+background: #ffffff;
+border-radius: 20px 20px 0 0;
+width: 100%;
+max-width: 600px;
+max-height: 88vh;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+-webkit-animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.12);
+padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+@-webkit-keyframes slideUp {
+from { -webkit-transform: translateY(100%); transform: translateY(100%); }
+to { -webkit-transform: translateY(0); transform: translateY(0); }
+}
+
+@keyframes slideUp {
+from { transform: translateY(100%); }
+to { transform: translateY(0); }
+}
+
+.detail-handle {
+width: 36px;
+height: 4px;
+background: #d1d5db;
+border-radius: 2px;
+margin: 10px auto 0 auto;
+}
+
+.detail-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px 20px 12px 20px;
+border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+position: sticky;
+top: 0;
+background: #ffffff;
+z-index: 2;
+}
+
+.detail-header h3 {
+font-size: 17px;
+font-weight: 700;
+color: #1e293b;
+}
+
+.detail-header-actions {
+display: flex;
+gap: 8px;
+}
+
+.detail-close-btn {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+border: none;
+background: #f4f8f6;
+color: #64748b;
+font-size: 16px;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+-webkit-appearance: none;
+appearance: none;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-close-btn:active {
+background: #eaf3ef;
+}
+
+.detail-edit-btn {
+padding: 6px 14px;
+border-radius: 8px;
+border: 1px solid rgba(16, 185, 129, 0.35);
+background: #d1fae5;
+color: #059669;
+font-family: ‘DM Sans’, -apple-system, sans-serif;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+-webkit-appearance: none;
+appearance: none;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-edit-btn:active {
+background: rgba(16, 185, 129, 0.18);
+}
+
+.detail-body {
+padding: 20px;
+}
+
+.detail-body .summary-section { margin-bottom: 18px; }
+.detail-body .summary-divider { margin: 14px 0; }
+
+.view-btn {
+width: 32px;
+height: 32px;
+border-radius: 8px;
+border: 1px solid rgba(0, 0, 0, 0.07);
+background: #f4f8f6;
+color: #94a3b8;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+font-size: 15px;
+-webkit-appearance: none;
+appearance: none;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-btn:active {
+background: #d1fae5;
+color: #059669;
+border-color: rgba(16, 185, 129, 0.35);
+}
+
+/* ===== SEARCH BAR ===== */
+.search-bar {
+position: relative;
+margin-bottom: 16px;
+}
+
+.search-bar input {
+width: 100%;
+padding: 12px 16px 12px 44px;
+background: #ffffff;
+border: 1px solid rgba(0, 0, 0, 0.07);
+border-radius: 12px;
+color: #1e293b;
+font-family: ‘DM Sans’, -apple-system, sans-serif;
+font-size: 16px;
+outline: none;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+-webkit-appearance: none;
+appearance: none;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.search-bar input:focus {
+border-color: #10b981;
+box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.10);
+}
+
+.search-bar input::placeholder {
+color: #94a3b8;
+}
+
+.search-icon {
+position: absolute;
+left: 14px;
+top: 50%;
+-webkit-transform: translateY(-50%);
+transform: translateY(-50%);
+color: #94a3b8;
+font-size: 16px;
+pointer-events: none;
+}
+
+.search-clear {
+position: absolute;
+right: 8px;
+top: 50%;
+-webkit-transform: translateY(-50%);
+transform: translateY(-50%);
+width: 28px;
+height: 28px;
+border-radius: 50%;
+border: none;
+background: transparent;
+color: #94a3b8;
+font-size: 16px;
+cursor: pointer;
+display: none;
+align-items: center;
+justify-content: center;
+-webkit-appearance: none;
+appearance: none;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-clear.visible {
+display: -webkit-flex;
+display: flex;
+}
+
+.search-clear:active {
+background: rgba(255, 255, 255, 0.08);
+color: #1e293b;
+}
+
+.search-results-info {
+font-size: 12px;
+color: #94a3b8;
+margin-bottom: 10px;
+display: none;
+}
+
+.search-results-info.visible {
+display: block;
+}
+
+.search-highlight {
+color: #10b981;
+font-weight: 600;
+}
+
+/* ===== PATIENTS LIST ===== */
+.patient-item {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px;
+background: #ffffff;
+border: 1px solid rgba(0, 0, 0, 0.07);
+border-radius: 12px;
+margin-bottom: 10px;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.patient-item:active {
+border-color: rgba(16, 185, 129, 0.35);
+background: #d1fae5;
+}
+
+.patient-info {
+min-width: 0;
+flex: 1;
+}
+
+.patient-info h4 {
+font-size: 15px;
+font-weight: 600;
+margin-bottom: 4px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.patient-info p {
+font-size: 12px;
+color: #64748b;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.patient-actions {
+display: flex;
+align-items: center;
+gap: 8px;
+flex-shrink: 0;
+margin-left: 10px;
+}
+
+.patient-asa {
+font-family: ‘Space Mono’, monospace;
+font-weight: 700;
+font-size: 14px;
+color: #059669;
+padding: 6px 12px;
+background: #d1fae5;
+border-radius: 8px;
+white-space: nowrap;
+}
+
+.delete-btn {
+width: 32px;
+height: 32px;
+border-radius: 8px;
+border: 1px solid rgba(0, 0, 0, 0.07);
+background: #f4f8f6;
+color: #94a3b8;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+font-size: 14px;
+-webkit-appearance: none;
+appearance: none;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.delete-btn:active {
+background: #fef2f2;
+color: #ef4444;
+border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+text-align: center;
+padding: 60px 20px;
+}
+
+.empty-icon {
+font-size: 48px;
+margin-bottom: 16px;
+opacity: 0.5;
+}
+
+.empty-text {
+color: #94a3b8;
+font-size: 15px;
+}
+
+/* ===== HOME ===== */
+.home-stats {
+display: -webkit-flex;
+display: flex;
+gap: 12px;
+margin-bottom: 24px;
+}
+
+.stat-card {
+background: #ffffff;
+border: 1px solid rgba(0, 0, 0, 0.07);
+border-radius: 16px;
+padding: 18px;
+text-align: center;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.stat-number {
+font-family: ‘Space Mono’, monospace;
+font-size: 28px;
+font-weight: 700;
+color: #059669;
+}
+
+.stat-label {
+font-size: 11px;
+color: #94a3b8;
+text-transform: uppercase;
+letter-spacing: 0.8px;
+margin-top: 4px;
+}
+
+.btn-new {
+width: 100%;
+padding: 18px;
+border-radius: 16px;
+border: 2px dashed rgba(16, 185, 129, 0.35);
+background: #d1fae5;
+color: #059669;
+font-family: ‘DM Sans’, -apple-system, sans-serif;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 10px;
+margin-bottom: 24px;
+-webkit-appearance: none;
+appearance: none;
+}
+
+.btn-new:active {
+background: rgba(16, 185, 129, 0.18);
+border-color: #10b981;
+}
+
+.section-title {
+font-size: 13px;
+font-weight: 600;
+color: #94a3b8;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 12px;
+}
+
+/* ===== TOAST ===== */
+.toast {
+position: fixed;
+bottom: -80px;
+left: 50%;
+-webkit-transform: translateX(-50%);
+transform: translateX(-50%);
+background: #10b981;
+color: #ffffff;
+padding: 14px 28px;
+border-radius: 12px;
+font-weight: 600;
+font-size: 14px;
+z-index: 999;
+transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+white-space: nowrap;
+}
+
+.toast.show {
+bottom: max(30px, env(safe-area-inset-bottom));
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0, 0, 0, 0.6);
+z-index: 200;
+-webkit-align-items: center;
+align-items: center;
+-webkit-justify-content: center;
+justify-content: center;
+padding: 20px;
+}
+
+.modal-overlay.show {
+display: -webkit-flex;
+display: flex;
+}
+
+.modal {
+background: #ffffff;
+border: 1px solid rgba(0, 0, 0, 0.07);
+border-radius: 16px;
+padding: 28px;
+max-width: 400px;
+width: 100%;
+-webkit-animation: fadeInUp 0.3s ease;
+animation: fadeInUp 0.3s ease;
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.modal h3 {
+font-size: 18px;
+margin-bottom: 10px;
+color: #1e293b;
+}
+
+.modal p {
+font-size: 14px;
+color: #64748b;
+margin-bottom: 20px;
+}
+
+.modal-actions {
+display: flex;
+gap: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 420px) {
+.mallampati-grid > .mallampati-option { -webkit-flex: 1 1 40%; flex: 1 1 40%; }
+.asa-grid > .asa-option { -webkit-flex: 1 1 40%; flex: 1 1 40%; }
+.form-row > .form-group { -webkit-flex: 1 1 100%; flex: 1 1 100%; }
+.form-row-3 > .form-group { -webkit-flex: 1 1 100%; flex: 1 1 100%; }
+.step-label { font-size: 8px; }
+}
+
+/* iOS input zoom fix - font-size must be 16px */
+@supports (-webkit-touch-callout: none) {
+.form-input, .form-select, .form-textarea {
+font-size: 16px;
+}
+}
+
+/* ===== KODER / WEBKIT COMPATIBILITY ===== */
+.form-row {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 12px;
+}
+.form-row > .form-group {
+-webkit-box-flex: 1;
+-webkit-flex: 1 1 45%;
+flex: 1 1 45%;
+min-width: 120px;
+}
+.form-row-3 {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 12px;
+}
+.form-row-3 > .form-group {
+-webkit-box-flex: 1;
+-webkit-flex: 1 1 28%;
+flex: 1 1 28%;
+min-width: 90px;
+}
+.mallampati-grid {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 10px;
+}
+.mallampati-grid > .mallampati-option {
+-webkit-box-flex: 1;
+-webkit-flex: 1 1 20%;
+flex: 1 1 20%;
+min-width: 70px;
+}
+.asa-grid {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+-webkit-flex-wrap: wrap;
+flex-wrap: wrap;
+gap: 8px;
+}
+.asa-grid > .asa-option {
+-webkit-box-flex: 1;
+-webkit-flex: 1 1 28%;
+flex: 1 1 28%;
+min-width: 80px;
+}
+.home-stats {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+gap: 12px;
+}
+.home-stats > .stat-card {
+-webkit-box-flex: 1;
+-webkit-flex: 1;
+flex: 1;
+}
+.nav-buttons {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.progress-steps {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.header-content {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.toggle-group {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+-webkit-flex-direction: column;
+flex-direction: column;
+}
+.toggle-item {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.card-header {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.card-icon {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.logo {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.logo-icon {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.header-actions {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.header-btn {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.btn {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.btn-new {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.patient-item {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.patient-actions {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.step-dot {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.mallampati-option {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+-webkit-flex-direction: column;
+flex-direction: column;
+}
+.mallampati-visual {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.modal-actions {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.detail-header {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.detail-header-actions {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.detail-close-btn {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.view-btn {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.delete-btn {
+display: -webkit-box;
+display: -webkit-flex;
+display: flex;
+}
+.search-clear.visible {
+display: -webkit-flex;
+display: flex;
+}
+</style>
+
+</head>
+<body>
+
+<header class="header">
+  <div class="header-content">
+    <div class="logo">
+      <div class="logo-icon">&#x1FAC1;</div>
+      <div class="logo-text">Pre<span>Anestesia</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" onclick="showHome()" title="Inicio">&#x1F3E0;</button>
+      <button class="header-btn" onclick="exportAllData()" title="Exportar">&#x1F4E4;</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- HOME -->
+
+  <div id="homeView">
+    <div style="margin-top: 8px; margin-bottom: 24px;">
+      <h1 style="font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Avaliacao<br>Pre-Anestesica</h1>
+      <p style="color: #64748b; font-size: 14px; margin-top: 6px;">Coleta digital de dados pre-operatorios</p>
+    </div>
+
+```
+<div class="home-stats">
+  <div class="stat-card">
+    <div class="stat-number" id="totalPatients">0</div>
+    <div class="stat-label">Pacientes</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="todayPatients">0</div>
+    <div class="stat-label">Hoje</div>
+  </div>
+</div>
+
+<button class="btn-new" onclick="startNew()">
+  <span style="font-size: 22px;">+</span> Nova Avaliacao
+</button>
+
+<div class="section-title">Avaliacoes Recentes</div>
+
+<div class="search-bar" id="searchBar" style="display: none;">
+  <span class="search-icon">&#x1F50D;</span>
+  <input type="text" id="searchInput" placeholder="Buscar por nome, cirurgia, ASA..." autocomplete="off" autocorrect="off" spellcheck="false">
+  <button class="search-clear" id="searchClear" onclick="clearSearch()">&#x2715;</button>
+</div>
+<div class="search-results-info" id="searchInfo"></div>
+
+<div id="patientsList"></div>
+```
+
+  </div>
+
+  <!-- FORM -->
+
+  <div id="formView" style="display: none;">
+
+```
+<div class="progress-container">
+  <div class="progress-steps" id="progressSteps"></div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="step-view" id="step1">
+  <div class="step-title">Dados Pessoais</div>
+  <div class="step-subtitle">Informacoes basicas do paciente</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon teal">&#x1F464;</div>
+      <div class="card-title">Identificacao</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome Completo</label>
+      <input type="text" class="form-input" id="nome" placeholder="Nome do paciente" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">CPF</label>
+      <input type="text" class="form-input" id="cpf" placeholder="000.000.000-00" autocomplete="off" inputmode="numeric" maxlength="14" oninput="maskCPF(this)">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Idade</label>
+        <input type="number" class="form-input" id="idade" placeholder="Anos" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sexo</label>
+        <select class="form-select" id="sexo">
+          <option value="">Selecione</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Feminino">Feminino</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group">
+        <label class="form-label">Peso (kg)</label>
+        <input type="number" class="form-input" id="peso" placeholder="kg" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Altura (cm)</label>
+        <input type="number" class="form-input" id="altura" placeholder="cm" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">IMC</label>
+        <input type="text" class="form-input" id="imc" placeholder="Auto" readonly style="color: #059669; background: #d1fae5;">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">&#x1F4CB;</div>
+      <div class="card-title">Procedimento</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Data do Procedimento</label>
+      <input type="date" class="form-input" id="dataProcedimento">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nome da Cirurgia</label>
+      <input type="text" class="form-input" id="nomeCirurgia" placeholder="Ex: Colecistectomia videolaparoscopica" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hospital</label>
+      <input type="text" class="form-input" id="hospital" placeholder="Nome do hospital" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cirurgiao</label>
+      <input type="text" class="form-input" id="cirurgiao" placeholder="Nome do cirurgiao" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Segundo Anestesista</label>
+      <input type="text" class="form-input" id="segundoAnestesista" placeholder="Nome do segundo anestesista (opcional)" autocomplete="off">
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step-view" id="step2">
+  <div class="step-title">Historico Medico</div>
+  <div class="step-subtitle">Comorbidades e antecedentes</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon red">&#x2764;&#xFE0F;</div>
+      <div class="card-title">Comorbidades</div>
+    </div>
+    <div class="toggle-group" id="comorbidades">
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Hipertensao Arterial</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Diabetes Mellitus</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Cardiopatia</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Pneumopatia / Asma / DPOC</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Doenca Renal</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Doenca Hepatica</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Doenca Neurologica</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Obesidade</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Tabagismo</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Etilismo</div></div>
+    </div>
+    <div class="form-group" style="margin-top: 14px;">
+      <label class="form-label">Outras Comorbidades</label>
+      <input type="text" class="form-input" id="outrasComorbidades" placeholder="Especifique outras..." autocomplete="off">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon orange">&#x26A0;&#xFE0F;</div>
+      <div class="card-title">Antecedentes Anestesicos</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cirurgias Anteriores</label>
+      <textarea class="form-textarea" id="cirurgiasAnteriores" placeholder="Descreva cirurgias e anestesias previas..."></textarea>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-item" onclick="toggleItem(this)" id="toggleIntDificil"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Historico de intubacao dificil</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)" id="toggleReacaoAdversa"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Reacao adversa a anestesia previa</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step-view" id="step3">
+  <div class="step-title">Medicacoes e Alergias</div>
+  <div class="step-subtitle">Medicamentos em uso e alergias conhecidas</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">&#x1F48A;</div>
+      <div class="card-title">Medicacoes em Uso</div>
+    </div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="medicacoes" placeholder="Liste as medicacoes em uso continuo, dosagem e posologia..." style="min-height: 120px;"></textarea>
+    </div>
+    <div class="toggle-group">
+      <div class="toggle-item" onclick="toggleItem(this)" id="toggleAnticoag"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Uso de Anticoagulantes</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)" id="toggleAntiag"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Uso de Antiplaquetarios</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)" id="toggleInsulina"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Uso de Insulina</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon red">&#x1F6A8;</div>
+      <div class="card-title">Alergias</div>
+    </div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="alergias" placeholder="Descreva alergias conhecidas (medicamentos, latex, alimentos...)"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step-view" id="step4">
+  <div class="step-title">Via Aerea e Classificacao</div>
+  <div class="step-subtitle">Mallampati, ASA e exames</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon teal">&#x1F444;</div>
+      <div class="card-title">Classificacao de Mallampati</div>
+    </div>
+    <div class="mallampati-grid" id="mallampatiGrid">
+      <div class="mallampati-option" onclick="selectMallampati(this, 'I')">
+        <div class="mallampati-visual" style="color: #4ade80;">&#x25CF;</div>
+        <div class="mallampati-label">I</div>
+        <div class="mallampati-desc">Palato mole, fauces, uvula, pilares</div>
+      </div>
+      <div class="mallampati-option" onclick="selectMallampati(this, 'II')">
+        <div class="mallampati-visual" style="color: #facc15;">&#x25CF;</div>
+        <div class="mallampati-label">II</div>
+        <div class="mallampati-desc">Palato mole, fauces, uvula</div>
+      </div>
+      <div class="mallampati-option" onclick="selectMallampati(this, 'III')">
+        <div class="mallampati-visual" style="color: #fb923c;">&#x25CF;</div>
+        <div class="mallampati-label">III</div>
+        <div class="mallampati-desc">Palato mole, base da uvula</div>
+      </div>
+      <div class="mallampati-option" onclick="selectMallampati(this, 'IV')">
+        <div class="mallampati-visual" style="color: #f87171;">&#x25CF;</div>
+        <div class="mallampati-label">IV</div>
+        <div class="mallampati-desc">Apenas palato duro</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">&#x1F9B7;</div>
+      <div class="card-title">Exame da Via Aerea</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Abertura de Boca</label>
+        <select class="form-select" id="aberturaBoca">
+          <option value="">Selecione</option>
+          <option value="Maior que 3 cm">Maior que 3 cm</option>
+          <option value="Entre 2 e 3 cm">Entre 2 e 3 cm</option>
+          <option value="Menor que 2 cm">Menor que 2 cm</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dist. Tireomentoniana</label>
+        <select class="form-select" id="distTireomentoniana">
+          <option value="">Selecione</option>
+          <option value="Maior que 6,5 cm (Classe I)">Maior que 6,5 cm (I)</option>
+          <option value="Entre 6 e 6,5 cm (Classe II)">Entre 6 e 6,5 cm (II)</option>
+          <option value="Menor que 6 cm (Classe III)">Menor que 6 cm (III)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Protese Dentaria</label>
+      <div class="toggle-group" id="proteseDentaria">
+        <div class="toggle-item" onclick="selectProtese(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Sem protese</div></div>
+        <div class="toggle-item" onclick="selectProtese(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Protese total superior</div></div>
+        <div class="toggle-item" onclick="selectProtese(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Protese total inferior</div></div>
+        <div class="toggle-item" onclick="selectProtese(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Protese parcial</div></div>
+        <div class="toggle-item" onclick="selectProtese(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Dentes ausentes / soltos</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon orange">&#x1F4CA;</div>
+      <div class="card-title">Classificacao ASA</div>
+    </div>
+    <div class="asa-grid" id="asaGrid">
+      <div class="asa-option" onclick="selectASA(this, 'I')"><div class="asa-number">I</div><div class="asa-desc">Saudavel</div></div>
+      <div class="asa-option" onclick="selectASA(this, 'II')"><div class="asa-number">II</div><div class="asa-desc">Doenca sistemica leve</div></div>
+      <div class="asa-option" onclick="selectASA(this, 'III')"><div class="asa-number">III</div><div class="asa-desc">Doenca sistemica grave</div></div>
+      <div class="asa-option" onclick="selectASA(this, 'IV')"><div class="asa-number">IV</div><div class="asa-desc">Ameaca constante a vida</div></div>
+      <div class="asa-option" onclick="selectASA(this, 'V')"><div class="asa-number">V</div><div class="asa-desc">Moribundo</div></div>
+      <div class="asa-option" onclick="selectASA(this, 'VI')"><div class="asa-number">VI</div><div class="asa-desc">Morte encefalica</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">&#x1F52C;</div>
+      <div class="card-title">Exames Complementares</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Hemoglobina (g/dL)</label>
+        <input type="number" step="0.1" class="form-input" id="hemoglobina" placeholder="g/dL" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hematocrito (%)</label>
+        <input type="number" step="0.1" class="form-input" id="hematocrito" placeholder="%" inputmode="decimal">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Plaquetas (mil)</label>
+        <input type="number" class="form-input" id="plaquetas" placeholder="mil/mm3" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Creatinina (mg/dL)</label>
+        <input type="number" step="0.01" class="form-input" id="creatinina" placeholder="mg/dL" inputmode="decimal">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Glicemia (mg/dL)</label>
+        <input type="number" class="form-input" id="glicemia" placeholder="mg/dL" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Coagulograma</label>
+        <select class="form-select" id="coagulograma">
+          <option value="">Selecione</option>
+          <option value="Normal">Normal</option>
+          <option value="Alterado">Alterado</option>
+          <option value="Nao realizado">Nao realizado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ECG</label>
+      <select class="form-select" id="ecg">
+        <option value="">Selecione</option>
+        <option value="Normal / Ritmo Sinusal">Normal / Ritmo Sinusal</option>
+        <option value="Alterado">Alterado</option>
+        <option value="Nao realizado">Nao realizado</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observacoes sobre exames</label>
+      <textarea class="form-textarea" id="obsExames" placeholder="Resultados relevantes, exames adicionais..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="step-view" id="step5">
+  <div class="step-title">Plano Anestesico</div>
+  <div class="step-subtitle">Tecnica escolhida e observacoes finais</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon teal">&#x1F489;</div>
+      <div class="card-title">Tecnica Anestesica</div>
+    </div>
+    <div class="toggle-group" id="tecnicaAnestesica">
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Anestesia Geral</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Raquianestesia</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Peridural</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Bloqueio de Nervo Periferico</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Sedacao</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Anestesia Local</div></div>
+      <div class="toggle-item" onclick="toggleItem(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">Combinada (Geral + Regional)</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon red">&#x1FA7A;</div>
+      <div class="card-title">Cirurgia Realizada</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Procedimento Realizado</label>
+      <input type="text" class="form-input" id="cirurgiaRealizada" placeholder="Nome da cirurgia realizada" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Codigos Cirurgicos (TUSS / SUS / AMB)</label>
+      <textarea class="form-textarea" id="codigosCirurgicos" placeholder="Ex: 31003079 - Colecistectomia videolaparoscopica&#10;31003087 - Colangiografia&#10;&#10;Insira um codigo por linha..." style="min-height: 100px;"></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon orange">&#x1F4DD;</div>
+      <div class="card-title">Observacoes / Plano</div>
+    </div>
+    <div class="form-group">
+      <textarea class="form-textarea" id="observacoes" placeholder="Observacoes gerais, plano de monitorizacao, cuidados especiais, jejum..." style="min-height: 120px;"></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">&#x1F4B0;</div>
+      <div class="card-title">Valor da Anestesia</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor (R$)</label>
+      <input type="text" class="form-input" id="valorAnestesia" placeholder="R$ 0,00" inputmode="numeric" oninput="maskMoney(this)" style="font-size:18px;font-weight:600;color:#059669;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Forma de Pagamento</label>
+      <div class="toggle-group" id="formaPagamento">
+        <div class="toggle-item" onclick="selectPagamento(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">&#x1F4B5; Dinheiro</div></div>
+        <div class="toggle-item" onclick="selectPagamento(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">&#x1F3E6; Transferencia Bancaria</div></div>
+        <div class="toggle-item" onclick="selectPagamento(this)"><div class="toggle-check">&#x2713;</div><div class="toggle-text">&#x1F4F1; Pix</div></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status do Pagamento</label>
+      <div class="toggle-group" id="statusPagamento">
+        <div class="toggle-item" onclick="selectStatus(this)" style="border-left: 3px solid #059669;"><div class="toggle-check">&#x2713;</div><div class="toggle-text">&#x2705; Pago</div></div>
+        <div class="toggle-item" onclick="selectStatus(this)" style="border-left: 3px solid #ef4444;"><div class="toggle-check">&#x2713;</div><div class="toggle-text">&#x23F3; Nao Pago</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step-view" id="step6">
+  <div class="step-title">Resumo</div>
+  <div class="step-subtitle">Revise os dados antes de salvar</div>
+  <div class="card" id="summaryCard"></div>
+</div>
+
+<div class="nav-buttons">
+  <button class="btn btn-secondary" id="btnPrev" onclick="prevStep()">&#x2190; Voltar</button>
+  <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Proximo &#x2192;</button>
+</div>
+```
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Patient Detail Sheet -->
+
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetailIfBg(event)">
+  <div class="detail-sheet">
+    <div class="detail-handle"></div>
+    <div class="detail-header">
+      <h3 id="detailTitle">Resumo do Paciente</h3>
+      <div class="detail-header-actions">
+        <button class="detail-edit-btn" onclick="copyDetail()" style="background:#eff6ff;color:#2563eb;border-color:rgba(37,99,235,0.3);">&#x1F4CB; Copiar</button>
+        <button class="detail-edit-btn" id="detailEditBtn" onclick="editFromDetail()">&#x270F;&#xFE0F; Editar</button>
+        <button class="detail-close-btn" onclick="closeDetail()">&#x2715;</button>
+      </div>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>Excluir Avaliacao?</h3>
+    <p>Essa acao nao pode ser desfeita.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  "use strict";
+
+  var currentStep = 1;
+  var totalSteps = 6;
+  var patients = [];
+  var editingId = null;
+  var deletingId = null;
+  var selectedMallampati = "";
+  var selectedASA = "";
+  var stepNames = ["Pessoal", "Historico", "Medicacoes", "Exames", "Tecnica", "Resumo"];
+
+  // Load patients from localStorage
+  try {
+    var stored = localStorage.getItem("preanestesia_patients");
+    if (stored) patients = JSON.parse(stored);
+  } catch(e) {
+    patients = [];
+  }
+
+  // ===== INIT =====
+  function init() {
+    renderProgressSteps();
+    renderPatientsList();
+    updateStats();
+    setupIMCCalc();
+    setupSearch();
+  }
+
+  function setupIMCCalc() {
+    var pesoEl = document.getElementById("peso");
+    var alturaEl = document.getElementById("altura");
+    if (pesoEl) pesoEl.addEventListener("input", calcIMC);
+    if (alturaEl) alturaEl.addEventListener("input", calcIMC);
+  }
+
+  function calcIMC() {
+    var peso = parseFloat(document.getElementById("peso").value);
+    var altura = parseFloat(document.getElementById("altura").value) / 100;
+    var imcEl = document.getElementById("imc");
+    if (peso > 0 && altura > 0) {
+      imcEl.value = (peso / (altura * altura)).toFixed(1);
+    } else {
+      imcEl.value = "";
+    }
+  }
+
+  // ===== PROGRESS =====
+  function renderProgressSteps() {
+    var container = document.getElementById("progressSteps");
+    container.innerHTML = "";
+    for (var i = 1; i <= totalSteps; i++) {
+      var step = document.createElement("div");
+      var cls = "progress-step";
+      if (i === currentStep) cls += " active";
+      if (i < currentStep) cls += " completed";
+      step.className = cls;
+      step.setAttribute("data-step", i);
+      step.addEventListener("click", (function(s) { return function() { goToStep(s); }; })(i));
+      var dotText = i < currentStep ? "&#x2713;" : i;
+      step.innerHTML = '<div class="step-dot">' + dotText + '</div><div class="step-label">' + stepNames[i-1] + '</div>';
+      container.appendChild(step);
+    }
+    document.getElementById("progressFill").style.width = ((currentStep - 1) / (totalSteps - 1) * 100) + "%";
+  }
+
+  function updateNavButtons() {
+    var btnPrev = document.getElementById("btnPrev");
+    var btnNext = document.getElementById("btnNext");
+    btnPrev.style.display = currentStep === 1 ? "none" : "flex";
+
+    if (currentStep === totalSteps) {
+      btnNext.innerHTML = "&#x1F4BE; Salvar";
+      btnNext.onclick = savePatient;
+    } else {
+      btnNext.innerHTML = "Proximo &#x2192;";
+      btnNext.onclick = nextStep;
+    }
+  }
+
+  // ===== NAVIGATION =====
+  function showHome() {
+    document.getElementById("homeView").style.display = "block";
+    document.getElementById("formView").style.display = "none";
+    editingId = null;
+    clearSearch();
+    renderPatientsList();
+    updateStats();
+  }
+
+  function showForm() {
+    document.getElementById("homeView").style.display = "none";
+    document.getElementById("formView").style.display = "block";
+    currentStep = 1;
+    updateStepViews();
+  }
+
+  function startNew() {
+    clearForm();
+    editingId = null;
+    showForm();
+  }
+
+  function goToStep(step) {
+    if (step >= 1 && step <= totalSteps) {
+      currentStep = step;
+      if (currentStep === totalSteps) renderSummary();
+      updateStepViews();
+    }
+  }
+
+  function nextStep() {
+    if (currentStep < totalSteps) {
+      currentStep++;
+      if (currentStep === totalSteps) renderSummary();
+      updateStepViews();
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 1) {
+      currentStep--;
+      updateStepViews();
+    }
+  }
+
+  function updateStepViews() {
+    var views = document.querySelectorAll(".step-view");
+    for (var i = 0; i < views.length; i++) {
+      if (i + 1 === currentStep) {
+        views[i].classList.add("active");
+      } else {
+        views[i].classList.remove("active");
+      }
+    }
+    renderProgressSteps();
+    updateNavButtons();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ===== TOGGLES =====
+  function toggleItem(el) {
+    el.classList.toggle("selected");
+  }
+
+  function selectMallampati(el, val) {
+    var opts = document.querySelectorAll("#mallampatiGrid .mallampati-option");
+    for (var i = 0; i < opts.length; i++) opts[i].classList.remove("selected");
+    el.classList.add("selected");
+    selectedMallampati = val;
+  }
+
+  function selectASA(el, val) {
+    var opts = document.querySelectorAll("#asaGrid .asa-option");
+    for (var i = 0; i < opts.length; i++) opts[i].classList.remove("selected");
+    el.classList.add("selected");
+    selectedASA = val;
+  }
+
+  // ===== DATA =====
+  function getSelectedToggles(containerId) {
+    var items = document.querySelectorAll("#" + containerId + " .toggle-item.selected");
+    var result = [];
+    for (var i = 0; i < items.length; i++) {
+      result.push(items[i].querySelector(".toggle-text").textContent.trim());
+    }
+    return result;
+  }
+
+  function gv(id) {
+    var el = document.getElementById(id);
+    return el ? el.value : "";
+  }
+
+  function hasClass(id, cls) {
+    var el = document.getElementById(id);
+    return el ? el.classList.contains(cls) : false;
+  }
+
+  function collectData() {
+    return {
+      id: editingId || Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      nome: gv("nome"),
+      cpf: gv("cpf"),
+      idade: gv("idade"),
+      sexo: gv("sexo"),
+      peso: gv("peso"),
+      altura: gv("altura"),
+      imc: gv("imc"),
+      dataProcedimento: gv("dataProcedimento"),
+      nomeCirurgia: gv("nomeCirurgia"),
+      hospital: gv("hospital"),
+      cirurgiao: gv("cirurgiao"),
+      segundoAnestesista: gv("segundoAnestesista"),
+      comorbidades: getSelectedToggles("comorbidades"),
+      outrasComorbidades: gv("outrasComorbidades"),
+      cirurgiasAnteriores: gv("cirurgiasAnteriores"),
+      intubacaoDificil: hasClass("toggleIntDificil", "selected"),
+      reacaoAdversa: hasClass("toggleReacaoAdversa", "selected"),
+      medicacoes: gv("medicacoes"),
+      anticoagulantes: hasClass("toggleAnticoag", "selected"),
+      antiplaquetarios: hasClass("toggleAntiag", "selected"),
+      insulina: hasClass("toggleInsulina", "selected"),
+      alergias: gv("alergias"),
+      mallampati: selectedMallampati,
+      aberturaBoca: gv("aberturaBoca"),
+      distTireomentoniana: gv("distTireomentoniana"),
+      proteseDentaria: getSelectedToggles("proteseDentaria"),
+      asa: selectedASA,
+      hemoglobina: gv("hemoglobina"),
+      hematocrito: gv("hematocrito"),
+      plaquetas: gv("plaquetas"),
+      creatinina: gv("creatinina"),
+      glicemia: gv("glicemia"),
+      coagulograma: gv("coagulograma"),
+      ecg: gv("ecg"),
+      obsExames: gv("obsExames"),
+      tecnicaAnestesica: getSelectedToggles("tecnicaAnestesica"),
+      cirurgiaRealizada: gv("cirurgiaRealizada"),
+      codigosCirurgicos: gv("codigosCirurgicos"),
+      observacoes: gv("observacoes"),
+      valorAnestesia: gv("valorAnestesia"),
+      formaPagamento: getSelectedSingle("formaPagamento"),
+      statusPagamento: getSelectedSingle("statusPagamento")
+    };
+  }
+
+  // ===== SAVE =====
+  function savePatient() {
+    var data = collectData();
+    if (!data.nome) {
+      showToast("Informe o nome do paciente");
+      goToStep(1);
+      return;
+    }
+
+    if (editingId) {
+      for (var i = 0; i < patients.length; i++) {
+        if (patients[i].id === editingId) {
+          patients[i] = data;
+          break;
+        }
+      }
+    } else {
+      patients.unshift(data);
+    }
+
+    try {
+      localStorage.setItem("preanestesia_patients", JSON.stringify(patients));
+    } catch(e) {}
+    showToast("Avaliacao salva com sucesso!");
+    showHome();
+  }
+
+  // ===== LOAD =====
+  function loadPatient(id) {
+    var p = null;
+    for (var i = 0; i < patients.length; i++) {
+      if (patients[i].id === id) { p = patients[i]; break; }
+    }
+    if (!p) return;
+    editingId = id;
+
+    var fields = ["nome","cpf","idade","sexo","peso","altura","imc","dataProcedimento","nomeCirurgia","hospital","cirurgiao","segundoAnestesista","outrasComorbidades","cirurgiasAnteriores","medicacoes","alergias","hemoglobina","hematocrito","plaquetas","creatinina","glicemia","coagulograma","ecg","obsExames","observacoes","valorAnestesia","cirurgiaRealizada","codigosCirurgicos","aberturaBoca","distTireomentoniana"];
+    for (var i = 0; i < fields.length; i++) {
+      var el = document.getElementById(fields[i]);
+      if (el) el.value = p[fields[i]] || "";
+    }
+
+    // Comorbidades
+    var items = document.querySelectorAll("#comorbidades .toggle-item");
+    for (var i = 0; i < items.length; i++) {
+      var txt = items[i].querySelector(".toggle-text").textContent.trim();
+      if ((p.comorbidades || []).indexOf(txt) >= 0) {
+        items[i].classList.add("selected");
+      } else {
+        items[i].classList.remove("selected");
+      }
+    }
+
+    // Simple toggles
+    var toggleMap = {
+      "toggleIntDificil": "intubacaoDificil",
+      "toggleReacaoAdversa": "reacaoAdversa",
+      "toggleAnticoag": "anticoagulantes",
+      "toggleAntiag": "antiplaquetarios",
+      "toggleInsulina": "insulina"
+    };
+    for (var tId in toggleMap) {
+      var el = document.getElementById(tId);
+      if (el) el.classList.toggle("selected", !!p[toggleMap[tId]]);
+    }
+
+    // Mallampati
+    selectedMallampati = p.mallampati || "";
+    var mOpts = document.querySelectorAll("#mallampatiGrid .mallampati-option");
+    for (var i = 0; i < mOpts.length; i++) {
+      var lbl = mOpts[i].querySelector(".mallampati-label").textContent;
+      mOpts[i].classList.toggle("selected", lbl === selectedMallampati);
+    }
+
+    // ASA
+    selectedASA = p.asa || "";
+    var aOpts = document.querySelectorAll("#asaGrid .asa-option");
+    for (var i = 0; i < aOpts.length; i++) {
+      var num = aOpts[i].querySelector(".asa-number").textContent;
+      aOpts[i].classList.toggle("selected", num === selectedASA);
+    }
+
+    // Tecnica
+    var tItems = document.querySelectorAll("#tecnicaAnestesica .toggle-item");
+    for (var i = 0; i < tItems.length; i++) {
+      var txt = tItems[i].querySelector(".toggle-text").textContent.trim();
+      if ((p.tecnicaAnestesica || []).indexOf(txt) >= 0) {
+        tItems[i].classList.add("selected");
+      } else {
+        tItems[i].classList.remove("selected");
+      }
+    }
+
+    // Forma de pagamento
+    var fpItems = document.querySelectorAll("#formaPagamento .toggle-item");
+    for (var i = 0; i < fpItems.length; i++) {
+      var txt = fpItems[i].querySelector(".toggle-text").textContent.trim();
+      fpItems[i].classList.toggle("selected", txt === (p.formaPagamento || ""));
+    }
+
+    // Protese dentaria
+    var pdItems = document.querySelectorAll("#proteseDentaria .toggle-item");
+    for (var i = 0; i < pdItems.length; i++) {
+      var txt = pdItems[i].querySelector(".toggle-text").textContent.trim();
+      if ((p.proteseDentaria || []).indexOf(txt) >= 0) {
+        pdItems[i].classList.add("selected");
+      } else {
+        pdItems[i].classList.remove("selected");
+      }
+    }
+
+    // Status pagamento
+    var spItems = document.querySelectorAll("#statusPagamento .toggle-item");
+    for (var i = 0; i < spItems.length; i++) {
+      var txt = spItems[i].querySelector(".toggle-text").textContent.trim();
+      spItems[i].classList.toggle("selected", txt === (p.statusPagamento || ""));
+    }
+
+    showForm();
+  }
+
+  // ===== CLEAR =====
+  function clearForm() {
+    var inputs = document.querySelectorAll(".form-input, .form-textarea");
+    for (var i = 0; i < inputs.length; i++) inputs[i].value = "";
+    var selects = document.querySelectorAll(".form-select");
+    for (var i = 0; i < selects.length; i++) selects[i].selectedIndex = 0;
+    var toggles = document.querySelectorAll(".toggle-item");
+    for (var i = 0; i < toggles.length; i++) toggles[i].classList.remove("selected");
+    var mOpts = document.querySelectorAll(".mallampati-option, .asa-option");
+    for (var i = 0; i < mOpts.length; i++) mOpts[i].classList.remove("selected");
+    selectedMallampati = "";
+    selectedASA = "";
+  }
+
+  // ===== SUMMARY =====
+  function renderSummary() {
+    var d = collectData();
+    var card = document.getElementById("summaryCard");
+    card.innerHTML = buildSummaryHTML(d);
+  }
+
+  // ===== PATIENT DETAIL =====
+  var detailPatientId = null;
+
+  function buildSummaryHTML(d) {
+    function fmtDate(str) {
+      if (!str) return "\u2014";
+      var parts = str.split("-");
+      return parts[2] + "/" + parts[1] + "/" + parts[0];
+    }
+
+    var h = "";
+    h += '<div class="summary-section">';
+    h += '<div class="summary-label">Paciente</div>';
+    h += '<div class="summary-value" style="font-size:18px;font-weight:700;">' + (d.nome || "\u2014") + '</div>';
+    if (d.cpf) h += '<div class="summary-value" style="color:#64748b;font-size:13px;">CPF: ' + d.cpf + '</div>';
+    h += '<div class="summary-value">';
+    if (d.idade) h += d.idade + " anos ";
+    if (d.sexo) h += "| " + d.sexo + " ";
+    if (d.peso) h += "| " + d.peso + "kg ";
+    if (d.altura) h += "| " + d.altura + "cm ";
+    if (d.imc) h += "| IMC " + d.imc;
+    h += '</div></div><hr class="summary-divider">';
+
+    h += '<div class="summary-section"><div class="summary-label">Procedimento</div>';
+    h += '<div class="summary-value">' + (d.nomeCirurgia || "\u2014") + '</div>';
+    h += '<div class="summary-value" style="color:#64748b;">' + fmtDate(d.dataProcedimento) + '</div>';
+    if (d.hospital) h += '<div class="summary-value" style="color:#64748b;margin-top:4px;">&#x1F3E5; ' + d.hospital + '</div>';
+    if (d.cirurgiao) h += '<div class="summary-value" style="color:#64748b;">&#x1FA7A; Dr(a). ' + d.cirurgiao + '</div>';
+    if (d.segundoAnestesista) h += '<div class="summary-value" style="color:#64748b;">&#x1F489; 2o Anestesista: ' + d.segundoAnestesista + '</div>';
+    h += '</div><hr class="summary-divider">';
+
+    h += '<div class="summary-section"><div class="summary-label">Classificacao</div>';
+    h += '<div style="display:flex;gap:16px;margin-top:4px;">';
+    h += '<div class="summary-value highlight">ASA ' + (d.asa || "\u2014") + '</div>';
+    h += '<div class="summary-value highlight">Mallampati ' + (d.mallampati || "\u2014") + '</div>';
+    h += '</div></div><hr class="summary-divider">';
+
+    if (d.aberturaBoca || d.distTireomentoniana || (d.proteseDentaria && d.proteseDentaria.length)) {
+      h += '<div class="summary-section"><div class="summary-label">Via Aerea</div>';
+      if (d.aberturaBoca) h += '<div class="summary-value">Abertura de boca: ' + d.aberturaBoca + '</div>';
+      if (d.distTireomentoniana) h += '<div class="summary-value">Dist. tireomentoniana: ' + d.distTireomentoniana + '</div>';
+      var protese = d.proteseDentaria || [];
+      if (protese.length) {
+        for (var i = 0; i < protese.length; i++) h += '<span class="summary-tag">' + protese[i] + '</span>';
+      }
+      h += '</div><hr class="summary-divider">';
+    }
+
+    var comorbidades = d.comorbidades || [];
+    if (comorbidades.length > 0 || d.outrasComorbidades) {
+      h += '<div class="summary-section"><div class="summary-label">Comorbidades</div>';
+      for (var i = 0; i < comorbidades.length; i++) h += '<span class="summary-tag">' + comorbidades[i] + '</span>';
+      if (d.outrasComorbidades) h += '<span class="summary-tag">' + d.outrasComorbidades + '</span>';
+      h += '</div><hr class="summary-divider">';
+    }
+
+    if (d.intubacaoDificil || d.reacaoAdversa) {
+      h += '<div class="summary-section"><div class="summary-label">Alertas</div>';
+      if (d.intubacaoDificil) h += '<span class="summary-tag red">Intubacao Dificil</span>';
+      if (d.reacaoAdversa) h += '<span class="summary-tag red">Reacao Adversa Previa</span>';
+      h += '</div><hr class="summary-divider">';
+    }
+
+    if (d.cirurgiasAnteriores) {
+      h += '<div class="summary-section"><div class="summary-label">Cirurgias Anteriores</div>';
+      h += '<div class="summary-value">' + d.cirurgiasAnteriores.replace(/\n/g, "<br>") + '</div>';
+      h += '</div><hr class="summary-divider">';
+    }
+
+    if (d.medicacoes) {
+      h += '<div class="summary-section"><div class="summary-label">Medicacoes</div>';
+      h += '<div class="summary-value">' + d.medicacoes.replace(/\n/g, "<br>") + '</div>';
+      if (d.anticoagulantes) h += '<span class="summary-tag red">Anticoagulante</span>';
+      if (d.antiplaquetarios) h += '<span class="summary-tag red">Antiplaquetario</span>';
+      if (d.insulina) h += '<span class="summary-tag">Insulina</span>';
+      h += '</div><hr class="summary-divider">';
+    }
+
+    if (d.alergias) {
+      h += '<div class="summary-section"><div class="summary-label">Alergias</div>';
+      h += '<div class="summary-value">' + d.alergias.replace(/\n/g, "<br>") + '</div>';
+      h += '</div><hr class="summary-divider">';
+    }
+
+    var exames = [];
+    if (d.hemoglobina) exames.push("Hb: " + d.hemoglobina + " g/dL");
+    if (d.hematocrito) exames.push("Ht: " + d.hematocrito + "%");
+    if (d.plaquetas) exames.push("Plaq: " + d.plaquetas + " mil");
+    if (d.creatinina) exames.push("Cr: " + d.creatinina + " mg/dL");
+    if (d.glicemia) exames.push("Glic: " + d.glicemia + " mg/dL");
+    if (d.coagulograma) exames.push("Coag: " + d.coagulograma);
+    if (d.ecg) exames.push("ECG: " + d.ecg);
+    if (exames.length) {
+      h += '<div class="summary-section"><div class="summary-label">Exames</div>';
+      h += '<div class="summary-value">' + exames.join(" | ") + '</div>';
+      h += '</div><hr class="summary-divider">';
+    }
+
+    if (d.obsExames) {
+      h += '<div class="summary-section"><div class="summary-label">Obs. Exames</div>';
+      h += '<div class="summary-value">' + d.obsExames.replace(/\n/g, "<br>") + '</div>';
+      h += '</div><hr class="summary-divider">';
+    }
+
+    var tecnica = d.tecnicaAnestesica || [];
+    if (tecnica.length) {
+      h += '<div class="summary-section"><div class="summary-label">Tecnica Anestesica</div>';
+      for (var i = 0; i < tecnica.length; i++) h += '<span class="summary-tag">' + tecnica[i] + '</span>';
+      h += '</div>';
+    }
+
+    if (d.cirurgiaRealizada || d.codigosCirurgicos) {
+      h += '<hr class="summary-divider"><div class="summary-section"><div class="summary-label">Cirurgia Realizada</div>';
+      if (d.cirurgiaRealizada) h += '<div class="summary-value" style="font-weight:600;">' + d.cirurgiaRealizada + '</div>';
+      if (d.codigosCirurgicos) h += '<div class="summary-value" style="margin-top:6px;font-family:Space Mono,monospace;font-size:13px;color:#64748b;">' + d.codigosCirurgicos.replace(/\n/g, "<br>") + '</div>';
+      h += '</div>';
+    }
+
+    if (d.observacoes) {
+      h += '<hr class="summary-divider"><div class="summary-section"><div class="summary-label">Observacoes</div>';
+      h += '<div class="summary-value">' + d.observacoes.replace(/\n/g, "<br>") + '</div></div>';
+    }
+
+    if (d.valorAnestesia) {
+      h += '<hr class="summary-divider"><div class="summary-section"><div class="summary-label">Valor da Anestesia</div>';
+      h += '<div class="summary-value highlight" style="font-size:20px;">&#x1F4B0; ' + d.valorAnestesia + '</div>';
+      if (d.formaPagamento) h += '<div class="summary-value" style="color:#64748b;margin-top:4px;">' + d.formaPagamento + '</div>';
+      if (d.statusPagamento) {
+        var isPago = d.statusPagamento.indexOf("Pago") >= 0 && d.statusPagamento.indexOf("Nao") < 0;
+        h += '<span class="summary-tag ' + (isPago ? "" : "red") + '" style="margin-top:8px;font-size:13px;">' + d.statusPagamento + '</span>';
+      }
+      h += '</div>';
+    }
+
+    return h;
+  }
+
+  function viewPatient(id) {
+    var p = null;
+    for (var i = 0; i < patients.length; i++) {
+      if (patients[i].id === id) { p = patients[i]; break; }
+    }
+    if (!p) return;
+    detailPatientId = id;
+
+    document.getElementById("detailTitle").textContent = p.nome || "Resumo do Paciente";
+    document.getElementById("detailBody").innerHTML = buildSummaryHTML(p);
+    document.getElementById("detailOverlay").classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeDetail() {
+    document.getElementById("detailOverlay").classList.remove("show");
+    document.body.style.overflow = "";
+    detailPatientId = null;
+  }
+
+  function closeDetailIfBg(e) {
+    if (e.target === document.getElementById("detailOverlay")) {
+      closeDetail();
+    }
+  }
+
+  function copyDetail() {
+    var p = null;
+    for (var i = 0; i < patients.length; i++) {
+      if (patients[i].id === detailPatientId) { p = patients[i]; break; }
+    }
+    if (!p) return;
+
+    function fmtDate(str) {
+      if (!str) return "";
+      var parts = str.split("-");
+      return parts[2] + "/" + parts[1] + "/" + parts[0];
+    }
+
+    var t = "";
+    t += "=== AVALIACAO PRE-ANESTESICA ===\n\n";
+
+    t += "PACIENTE: " + (p.nome || "-") + "\n";
+    if (p.cpf) t += "CPF: " + p.cpf + "\n";
+    var dados = [];
+    if (p.idade) dados.push(p.idade + " anos");
+    if (p.sexo) dados.push(p.sexo);
+    if (p.peso) dados.push(p.peso + "kg");
+    if (p.altura) dados.push(p.altura + "cm");
+    if (p.imc) dados.push("IMC " + p.imc);
+    if (dados.length) t += dados.join(" | ") + "\n";
+
+    t += "\nPROCEDIMENTO: " + (p.nomeCirurgia || "-") + "\n";
+    if (p.dataProcedimento) t += "Data: " + fmtDate(p.dataProcedimento) + "\n";
+    if (p.hospital) t += "Hospital: " + p.hospital + "\n";
+    if (p.cirurgiao) t += "Cirurgiao: Dr(a). " + p.cirurgiao + "\n";
+    if (p.segundoAnestesista) t += "2o Anestesista: " + p.segundoAnestesista + "\n";
+
+    t += "\nCLASSIFICACAO\n";
+    t += "ASA: " + (p.asa || "-") + "\n";
+    t += "Mallampati: " + (p.mallampati || "-") + "\n";
+
+    if (p.aberturaBoca || p.distTireomentoniana || (p.proteseDentaria && p.proteseDentaria.length)) {
+      t += "\nVIA AEREA\n";
+      if (p.aberturaBoca) t += "Abertura de boca: " + p.aberturaBoca + "\n";
+      if (p.distTireomentoniana) t += "Dist. tireomentoniana: " + p.distTireomentoniana + "\n";
+      if (p.proteseDentaria && p.proteseDentaria.length) t += "Protese dentaria: " + p.proteseDentaria.join(", ") + "\n";
+    }
+
+    var comorbidades = p.comorbidades || [];
+    if (comorbidades.length || p.outrasComorbidades) {
+      t += "\nCOMORBIDADES\n";
+      var todas = comorbidades.slice();
+      if (p.outrasComorbidades) todas.push(p.outrasComorbidades);
+      t += todas.join(", ") + "\n";
+    }
+
+    if (p.intubacaoDificil || p.reacaoAdversa) {
+      t += "\nALERTAS\n";
+      if (p.intubacaoDificil) t += "- Historico de intubacao dificil\n";
+      if (p.reacaoAdversa) t += "- Reacao adversa a anestesia previa\n";
+    }
+
+    if (p.cirurgiasAnteriores) {
+      t += "\nCIRURGIAS ANTERIORES\n" + p.cirurgiasAnteriores + "\n";
+    }
+
+    if (p.medicacoes) {
+      t += "\nMEDICACOES\n" + p.medicacoes + "\n";
+      var flags = [];
+      if (p.anticoagulantes) flags.push("Anticoagulante");
+      if (p.antiplaquetarios) flags.push("Antiplaquetario");
+      if (p.insulina) flags.push("Insulina");
+      if (flags.length) t += "Obs: " + flags.join(", ") + "\n";
+    }
+
+    if (p.alergias) {
+      t += "\nALERGIAS\n" + p.alergias + "\n";
+    }
+
+    var exames = [];
+    if (p.hemoglobina) exames.push("Hb: " + p.hemoglobina + " g/dL");
+    if (p.hematocrito) exames.push("Ht: " + p.hematocrito + "%");
+    if (p.plaquetas) exames.push("Plaq: " + p.plaquetas + " mil");
+    if (p.creatinina) exames.push("Cr: " + p.creatinina + " mg/dL");
+    if (p.glicemia) exames.push("Glic: " + p.glicemia + " mg/dL");
+    if (p.coagulograma) exames.push("Coag: " + p.coagulograma);
+    if (p.ecg) exames.push("ECG: " + p.ecg);
+    if (exames.length) {
+      t += "\nEXAMES\n" + exames.join(" | ") + "\n";
+    }
+    if (p.obsExames) t += "Obs: " + p.obsExames + "\n";
+
+    var tecnica = p.tecnicaAnestesica || [];
+    if (tecnica.length) {
+      t += "\nTECNICA ANESTESICA: " + tecnica.join(", ") + "\n";
+    }
+
+    if (p.cirurgiaRealizada || p.codigosCirurgicos) {
+      t += "\nCIRURGIA REALIZADA\n";
+      if (p.cirurgiaRealizada) t += p.cirurgiaRealizada + "\n";
+      if (p.codigosCirurgicos) t += "Codigos: " + p.codigosCirurgicos + "\n";
+    }
+
+    if (p.observacoes) {
+      t += "\nOBSERVACOES\n" + p.observacoes + "\n";
+    }
+
+    if (p.valorAnestesia) {
+      t += "\nVALOR: " + p.valorAnestesia + "\n";
+      if (p.formaPagamento) t += "Forma: " + p.formaPagamento + "\n";
+      if (p.statusPagamento) t += "Status: " + p.statusPagamento + "\n";
+    }
+
+    // Copy to clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function() {
+        showToast("Resumo copiado!");
+      }).catch(function() {
+        fallbackCopy(t);
+      });
+    } else {
+      fallbackCopy(t);
+    }
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand("copy");
+      showToast("Resumo copiado!");
+    } catch(e) {
+      showToast("Erro ao copiar");
+    }
+    document.body.removeChild(ta);
+  }
+
+  function editFromDetail() {
+    var id = detailPatientId;
+    closeDetail();
+    if (id) loadPatient(id);
+  }
+
+  // ===== SEARCH =====
+  var searchTerm = "";
+
+  function setupSearch() {
+    var input = document.getElementById("searchInput");
+    var clearBtn = document.getElementById("searchClear");
+    if (!input) return;
+
+    input.addEventListener("input", function() {
+      searchTerm = this.value.trim().toLowerCase();
+      if (clearBtn) {
+        if (searchTerm.length > 0) {
+          clearBtn.classList.add("visible");
+        } else {
+          clearBtn.classList.remove("visible");
+        }
+      }
+      renderPatientsList();
+      updateSearchInfo();
+    });
+  }
+
+  function clearSearch() {
+    var input = document.getElementById("searchInput");
+    var clearBtn = document.getElementById("searchClear");
+    var info = document.getElementById("searchInfo");
+    if (input) input.value = "";
+    if (clearBtn) clearBtn.classList.remove("visible");
+    if (info) info.classList.remove("visible");
+    searchTerm = "";
+    renderPatientsList();
+  }
+
+  function updateSearchInfo() {
+    var info = document.getElementById("searchInfo");
+    if (!info) return;
+    if (searchTerm.length === 0) {
+      info.classList.remove("visible");
+      return;
+    }
+    var filtered = filterPatients();
+    info.classList.add("visible");
+    info.innerHTML = '<span class="search-highlight">' + filtered.length + '</span> resultado' + (filtered.length !== 1 ? 's' : '') + ' para "' + searchTerm + '"';
+  }
+
+  function filterPatients() {
+    if (!searchTerm) return patients;
+    var results = [];
+    for (var i = 0; i < patients.length; i++) {
+      var p = patients[i];
+      var searchable = [
+        p.nome || "",
+        p.cpf || "",
+        p.nomeCirurgia || "",
+        p.hospital || "",
+        p.cirurgiao || "",
+        p.segundoAnestesista || "",
+        p.asa ? "ASA " + p.asa : "",
+        p.mallampati ? "Mallampati " + p.mallampati : "",
+        p.sexo || "",
+        p.idade ? p.idade + " anos" : "",
+        p.dataProcedimento || "",
+        p.medicacoes || "",
+        p.alergias || "",
+        p.observacoes || ""
+      ].concat(p.comorbidades || []).concat(p.tecnicaAnestesica || []);
+
+      var combined = searchable.join(" ").toLowerCase();
+      if (combined.indexOf(searchTerm) >= 0) {
+        results.push(p);
+      }
+    }
+    return results;
+  }
+
+  // ===== PATIENTS LIST =====
+  function renderPatientsList() {
+    var container = document.getElementById("patientsList");
+    var searchBar = document.getElementById("searchBar");
+
+    // Show search bar only when there are patients
+    if (searchBar) {
+      searchBar.style.display = patients.length > 0 ? "block" : "none";
+    }
+
+    var filtered = filterPatients();
+
+    if (patients.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F4CB;</div><div class="empty-text">Nenhuma avaliacao registrada</div></div>';
+      return;
+    }
+
+    if (filtered.length === 0 && searchTerm) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#x1F50D;</div><div class="empty-text">Nenhum resultado para "' + searchTerm + '"</div></div>';
+      return;
+    }
+
+    var html = "";
+    for (var i = 0; i < filtered.length; i++) {
+      var p = filtered[i];
+      var dateStr = "";
+      if (p.dataProcedimento) {
+        var parts = p.dataProcedimento.split("-");
+        dateStr = parts[2] + "/" + parts[1];
+      }
+      html += '<div class="patient-item" data-id="' + p.id + '">';
+      html += '<div class="patient-info"><h4>' + (p.nome || "Sem nome") + '</h4>';
+      html += '<p>' + (p.nomeCirurgia || "Sem procedimento") + ' | ' + (dateStr || "\u2014") + '</p></div>';
+      html += '<div class="patient-actions">';
+      html += '<div class="patient-asa">ASA ' + (p.asa || "?") + '</div>';
+      html += '<button class="view-btn" data-view="' + p.id + '" title="Ver resumo">&#x1F441;</button>';
+      html += '<button class="delete-btn" data-delete="' + p.id + '">&#x1F5D1;</button>';
+      html += '</div></div>';
+    }
+    container.innerHTML = html;
+
+    // Event delegation
+    var items = container.querySelectorAll(".patient-item");
+    for (var i = 0; i < items.length; i++) {
+      items[i].addEventListener("click", function(e) {
+        if (e.target.closest(".delete-btn") || e.target.closest(".view-btn")) return;
+        var id = this.getAttribute("data-id");
+        loadPatient(id);
+      });
+    }
+    var viewBtns = container.querySelectorAll(".view-btn");
+    for (var i = 0; i < viewBtns.length; i++) {
+      viewBtns[i].addEventListener("click", function(e) {
+        e.stopPropagation();
+        viewPatient(this.getAttribute("data-view"));
+      });
+    }
+    var delBtns = container.querySelectorAll(".delete-btn");
+    for (var i = 0; i < delBtns.length; i++) {
+      delBtns[i].addEventListener("click", function(e) {
+        e.stopPropagation();
+        openDeleteModal(this.getAttribute("data-delete"));
+      });
+    }
+  }
+
+  function updateStats() {
+    document.getElementById("totalPatients").textContent = patients.length;
+    var today = new Date().toISOString().split("T")[0];
+    var count = 0;
+    for (var i = 0; i < patients.length; i++) {
+      if (patients[i].dataProcedimento === today) count++;
+    }
+    document.getElementById("todayPatients").textContent = count;
+  }
+
+  // ===== DELETE =====
+  function openDeleteModal(id) {
+    deletingId = id;
+    document.getElementById("deleteModal").classList.add("show");
+  }
+
+  function closeDeleteModal() {
+    deletingId = null;
+    document.getElementById("deleteModal").classList.remove("show");
+  }
+
+  function confirmDelete() {
+    var newList = [];
+    for (var i = 0; i < patients.length; i++) {
+      if (patients[i].id !== deletingId) newList.push(patients[i]);
+    }
+    patients = newList;
+    try {
+      localStorage.setItem("preanestesia_patients", JSON.stringify(patients));
+    } catch(e) {}
+    closeDeleteModal();
+    renderPatientsList();
+    updateStats();
+    showToast("Avaliacao excluida");
+  }
+
+  // ===== EXPORT =====
+  function exportAllData() {
+    if (patients.length === 0) {
+      showToast("Nenhum dado para exportar");
+      return;
+    }
+    var dataStr = JSON.stringify(patients, null, 2);
+    var blob = new Blob([dataStr], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "preanestesia_backup_" + new Date().toISOString().split("T")[0] + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Dados exportados!");
+  }
+
+  // ===== TOAST =====
+  function showToast(msg) {
+    var toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(function() { toast.classList.remove("show"); }, 2500);
+  }
+
+  // ===== PROTESE SELECTOR =====
+  function selectProtese(el) {
+    var txt = el.querySelector(".toggle-text").textContent.trim();
+    if (txt === "Sem protese") {
+      var items = document.querySelectorAll("#proteseDentaria .toggle-item");
+      for (var i = 0; i < items.length; i++) items[i].classList.remove("selected");
+      el.classList.add("selected");
+    } else {
+      var semProtese = document.querySelector('#proteseDentaria .toggle-item:first-child');
+      if (semProtese) semProtese.classList.remove("selected");
+      el.classList.toggle("selected");
+    }
+  }
+
+  // ===== PAYMENT SELECTORS =====
+  function selectPagamento(el) {
+    var items = document.querySelectorAll("#formaPagamento .toggle-item");
+    for (var i = 0; i < items.length; i++) items[i].classList.remove("selected");
+    el.classList.add("selected");
+  }
+
+  function selectStatus(el) {
+    var items = document.querySelectorAll("#statusPagamento .toggle-item");
+    for (var i = 0; i < items.length; i++) items[i].classList.remove("selected");
+    el.classList.add("selected");
+  }
+
+  function getSelectedSingle(containerId) {
+    var sel = document.querySelector("#" + containerId + " .toggle-item.selected");
+    if (!sel) return "";
+    return sel.querySelector(".toggle-text").textContent.trim();
+  }
+
+  // ===== MONEY MASK =====
+  function maskMoney(el) {
+    var v = el.value.replace(/\D/g, "");
+    if (v === "") { el.value = ""; return; }
+    var n = parseInt(v, 10);
+    var formatted = (n / 100).toFixed(2);
+    formatted = formatted.replace(".", ",");
+    formatted = formatted.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    el.value = "R$ " + formatted;
+  }
+
+  // ===== CPF MASK =====
+  function maskCPF(el) {
+    var v = el.value.replace(/\D/g, "");
+    if (v.length > 11) v = v.substring(0, 11);
+    if (v.length > 9) {
+      v = v.substring(0,3) + "." + v.substring(3,6) + "." + v.substring(6,9) + "-" + v.substring(9);
+    } else if (v.length > 6) {
+      v = v.substring(0,3) + "." + v.substring(3,6) + "." + v.substring(6);
+    } else if (v.length > 3) {
+      v = v.substring(0,3) + "." + v.substring(3);
+    }
+    el.value = v;
+  }
+
+  // ===== EXPOSE TO GLOBAL =====
+  window.copyDetail = copyDetail;
+  window.viewPatient = viewPatient;
+  window.closeDetail = closeDetail;
+  window.closeDetailIfBg = closeDetailIfBg;
+  window.editFromDetail = editFromDetail;
+  window.clearSearch = clearSearch;
+  window.selectProtese = selectProtese;
+  window.selectPagamento = selectPagamento;
+  window.selectStatus = selectStatus;
+  window.maskMoney = maskMoney;
+  window.maskCPF = maskCPF;
+  window.showHome = showHome;
+  window.startNew = startNew;
+  window.nextStep = nextStep;
+  window.prevStep = prevStep;
+  window.toggleItem = toggleItem;
+  window.selectMallampati = selectMallampati;
+  window.selectASA = selectASA;
+  window.exportAllData = exportAllData;
+  window.closeDeleteModal = closeDeleteModal;
+  window.confirmDelete = confirmDelete;
+
+  // ===== SERVICE WORKER =====
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("./sw.js").catch(function() {});
+    });
+  }
+
+  // ===== START =====
+  init();
+
+})();
+</script>
+
+</body>
+</html>
